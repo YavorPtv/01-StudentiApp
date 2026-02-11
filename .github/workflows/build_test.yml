@@ -3,8 +3,6 @@ name: Build and test NodeJS application
 on:
   push:
     branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
 
 jobs:
   build_and_test:
@@ -18,12 +16,22 @@ jobs:
     steps:
     - name: Checkout the code
       uses: actions/checkout@v4
-    - name: Use Node.js ${{ matrix.node-version }}
+    - name: Use Node.js 20
       uses: actions/setup-node@v4
       with:
-        node-version: ${{ matrix.node-version }}
+        node-version: 20
         cache: 'npm'
     - name: Install dependencies
       run: npm install
     - name: Run tests
       run: npm test
+  deploy:
+    needs: build_and_test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to render
+        uses: JorgeLNJunior/render-deploy@v1.5.0
+        with:
+          service_id: ${{ secrets.RENDER_SERVICE_ID }}
+          api_key: ${{ secrets.RENDER_API_KEY }}
+          wait_deploy: true
